@@ -35,7 +35,7 @@ const ValidarPersonaNombre = () => {
             Swal.fire({
                 position: "center",
                 icon: "error",
-                title: "Revise el nombre de la persona",
+                title: "Ingrese correctamente el nombre",
                 text: "La cantidad de caracteres debe ser mayor a 2",
                 showConfirmButton: true,
             });
@@ -70,7 +70,7 @@ const GuardarLibro = async (event) => {
 
     const body = new FormData(FormLibros);
 
-    const url = '/parcial1_macs/libros/guardarAPI';
+    const url = '/parcial1_pmlx/libros/guardarAPI';
     const config = {
         method: 'POST',
         body
@@ -118,7 +118,7 @@ const GuardarLibro = async (event) => {
 
 const CargarLibros = async () => {
 
-    const url = '/parcial1_macs/libros/buscarAPI';
+    const url = '/parcial1_pmlx/libros/buscarAPI';
     const config = {
         method: 'GET'
     }
@@ -166,7 +166,7 @@ const GuardarPrestamo = async (event) => {
 
     const body = new FormData(FormPrestamos);
 
-    const url = '/parcial1_macs/prestamos/guardarAPI';
+    const url = '/parcial1_pmlx/prestamos/guardarAPI';
     const config = {
         method: 'POST',
         body
@@ -222,7 +222,7 @@ const BuscarPrestamos = async () => {
     if (fecha_inicio) params.append('fecha_inicio', fecha_inicio);
     if (fecha_fin) params.append('fecha_fin', fecha_fin);
 
-    const url = `/parcial1_macs/prestamos/buscarAPI?${params.toString()}`;
+    const url = `/parcial1_pmlx/prestamos/buscarAPI?${params.toString()}`;
     const config = {
         method: 'GET'
     }
@@ -399,7 +399,7 @@ const ModificarPrestamo = async (event) => {
 
     const body = new FormData(FormPrestamos);
 
-    const url = '/parcial1_macs/prestamos/modificarAPI';
+    const url = '/parcial1_pmlx/prestamos/modificarAPI';
     const config = {
         method: 'POST',
         body
@@ -462,7 +462,7 @@ const EliminarPrestamos = async (e) => {
 
     if (AlertaConfirmarEliminar.isConfirmed) {
 
-        const url =`/parcial1_macs/prestamos/eliminar?id=${idPrestamo}`;
+        const url =`/parcial1_pmlx/prestamos/eliminar?id=${idPrestamo}`;
         const config = {
             method: 'GET'
         }
@@ -520,7 +520,7 @@ const DevolverPrestamo = async (e) => {
 
     if (AlertaConfirmarDevolucion.isConfirmed) {
 
-        const url =`/parcial1_macs/prestamos/devolver?id=${idPrestamo}`;
+        const url =`/parcial1_pmlx/prestamos/devolver?id=${idPrestamo}`;
         const config = {
             method: 'GET'
         }
