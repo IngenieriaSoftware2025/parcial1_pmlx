@@ -11,7 +11,7 @@
     <title>Parcial Progra</title>
     <style>
         .bg-azul-oscuro {
-            background-color: #0a2463;
+            background-color:rgb(151, 19, 147);
         }
 
         .bg-verde-parcial1_avpc {
@@ -19,7 +19,7 @@
         }
 
         .bg-naranja-parcial1_avpc {
-            background-color: #fd7e14;
+            background-color:rgb(44, 4, 29);
         }
     </style>
 </head>
@@ -37,7 +37,10 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/parcial1_pmlx/libros">Libros</a>
+                        <a class="nav-link" href="/parcial1_pmlx/libros">LIBROS</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/parcial1_pmlx/prestamos">PRESTAMOS</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">

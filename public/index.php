@@ -15,6 +15,10 @@ $router->get('/', [AppController::class,'index']);
 // LIBROCONTROLLER
 $router->get('/libros', [LibroController::class, 'renderizarPagina']);
 
+
+//PRESTAMOSCONTROLLER
+$router->get('/prestamos', [LibroController::class, 'renderizarPagina']);
+
 // LIBROS 
 $router->post('/libros/guardarAPI', [LibroController::class, 'guardarAPI']);
 $router->get('/libros/buscarAPI', [LibroController::class, 'buscarAPI']);
