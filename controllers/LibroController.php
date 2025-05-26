@@ -14,12 +14,10 @@ class LibroController extends ActiveRecord
     {
         $router->render('libros/index', []);
     }
-
     public static function guardarAPI()
     {
 
         getHeadersApi();
-
         $_POST['libro_titulo'] = ucwords(strtolower(trim(htmlspecialchars($_POST['libro_titulo']))));
 
         $cantidad_titulo = strlen($_POST['libro_titulo']);
@@ -102,7 +100,6 @@ class LibroController extends ActiveRecord
 
     public static function modificarAPI()
     {
-
         getHeadersApi();
 
         $id = $_POST['libro_id'];

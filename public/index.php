@@ -9,19 +9,19 @@ use Controllers\AppController;
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
 
-// Ruta principal
+// INDEX-INICIO
 $router->get('/', [AppController::class,'index']);
 
-// Rutas para la página de libros (corregido - debe usar LibroController)
+// LIBROCONTROLLER
 $router->get('/libros', [LibroController::class, 'renderizarPagina']);
 
-// APIs de Libros
+// LIBROS 
 $router->post('/libros/guardarAPI', [LibroController::class, 'guardarAPI']);
 $router->get('/libros/buscarAPI', [LibroController::class, 'buscarAPI']);
 $router->post('/libros/modificarAPI', [LibroController::class, 'modificarAPI']);
 $router->get('/libros/eliminar', [LibroController::class, 'EliminarAPI']);
 
-// APIs de Préstamos
+// PRESTAMO
 $router->post('/prestamos/guardarAPI', [PrestamoController::class, 'guardarAPI']);
 $router->get('/prestamos/buscarAPI', [PrestamoController::class, 'buscarAPI']);
 $router->post('/prestamos/modificarAPI', [PrestamoController::class, 'modificarAPI']);
