@@ -5,15 +5,14 @@ namespace Controllers;
 use Exception;
 use Model\ActiveRecord;
 use Model\Prestamos;
-use Model\Usuarios;
 use MVC\Router;
 
-class UsuarioController extends ActiveRecord
+class PrestamoController extends ActiveRecord
 {
 
     public function renderizarPagina(Router $router)
     {
-        $router->render('usuarios/index', []);
+        $router->render('libros/index', []);
     }
 
     public static function guardarAPI()
@@ -21,184 +20,156 @@ class UsuarioController extends ActiveRecord
 
         getHeadersApi();
 
+        $_POST['libro_id'] = filter_var($_POST['libro_id'], FILTER_VALIDATE_INT);
 
-        $_POST['libro_id'] = filter_var($_POST['libro_id'], FILTER_SANITIZE_NUMBER_INT);
-       
-        $_POST['fecha_prestamo'] = date ('Y-m-d H:i', strtotime ($_POST['fecha_prestamo'])); // nuevo de fecha 
+        if ($_POST['libro_id'] <= 0) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Debe seleccionar un libro válido'
+            ]);
+            return;
+        }
 
+        $_POST['persona_nombre'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_nombre']))));
 
-            try {
+        $cantidad_nombre = strlen($_POST['persona_nombre']);
 
+        if ($cantidad_nombre < 2) {
 
-                // $data = new Usuarios();
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'La cantidad de digitos que debe de contener el nombre debe de ser mayor a dos'
+            ]);
+            return;
+        }
 
-                $data = new Prestamos([
-                    'libro_id' => $_POST['libro_id'],
-                    'fecha_prestamo' => $_POST['fecha_prestamo'],
-                    'fecha_devolucion' => $_POST['fecha_devolucion'],
-                    'estado' => $_POST['estado'],
-                ]);
+        $_POST['fecha_prestamo'] = date('Y-m-d H:i', strtotime($_POST['fecha_prestamo']));
 
-                $crear = $data->crear();
+        try {
 
-                http_response_code(200);
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'Exito el prestamo ha sido registrado correctamente'
-                ]);
-            } catch (Exception $e) {
-                http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al guardar',
-                    'detalle' => $e->getMessage(),
-                ]);
-            }
+            $data = new Prestamos([
+                'libro_id' => $_POST['libro_id'],
+                'persona_nombre' => $_POST['persona_nombre'],
+                'fecha_prestamo' => $_POST['fecha_prestamo'],
+                'fecha_devolucion' => null,
+                'prestamo_situacion' => 1
+            ]);
 
+            $crear = $data->crear();
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'Exito el prestamo ha sido registrado correctamente'
+            ]);
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error al guardar',
+                'detalle' => $e->getMessage(),
+            ]);
+        }
     }
 
     public static function buscarAPI()
     {
-
         try {
+            $fecha_inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : null;
+            $fecha_fin = isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : null;
 
-            // $data = Usuarios::all();
+            $condiciones = ["p.prestamo_situacion >= 0"];
 
-            $sql = "SELECT * FROM usuarios where usuario_situacion = 1";
+            if ($fecha_inicio) {
+                $condiciones[] = "p.fecha_prestamo >= '{$fecha_inicio} 00:00'";
+            }
+
+            if ($fecha_fin) {
+                $condiciones[] = "p.fecha_prestamo <= '{$fecha_fin} 23:59'";
+            }
+
+            $where = implode(" AND ", $condiciones);
+
+            $sql = "SELECT p.*, l.libro_titulo, l.libro_autor 
+                    FROM prestamos p 
+                    INNER JOIN libros l ON p.libro_id = l.libro_id 
+                    WHERE $where";
             $data = self::fetchArray($sql);
 
             http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
-                'mensaje' => 'Usuarios obtenidos correctamente',
+                'mensaje' => 'Prestamos obtenidos correctamente',
                 'data' => $data
             ]);
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error al obtener los usuarios',
+                'mensaje' => 'Error al obtener los prestamos',
                 'detalle' => $e->getMessage(),
             ]);
         }
     }
-
 
     public static function modificarAPI()
     {
 
         getHeadersApi();
 
-        $id = $_POST['usuario_id'];
-        $_POST['usuario_apellidos'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_apellidos']))));
+        $id = $_POST['prestamo_id'];
+        $_POST['libro_id'] = filter_var($_POST['libro_id'], FILTER_VALIDATE_INT);
 
-        $cantidad_apellidos = strlen($_POST['usuario_apellidos']);
-
-        if ($cantidad_apellidos < 2) {
-
+        if ($_POST['libro_id'] <= 0) {
             http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'La cantidad de digitos que debe de contener el apellido debe de ser mayor a dos'
+                'mensaje' => 'Debe seleccionar un libro válido'
             ]);
             return;
         }
 
-        $_POST['usuario_nombres'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_nombres']))));
+        $_POST['persona_nombre'] = ucwords(strtolower(trim(htmlspecialchars($_POST['persona_nombre']))));
 
-        $cantidad_nombres = strlen($_POST['usuario_nombres']);
+        $cantidad_nombre = strlen($_POST['persona_nombre']);
 
-
-        if ($cantidad_nombres < 2) {
+        if ($cantidad_nombre < 2) {
 
             http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mennsaje' => 'La cantidad de digitos que debe de contener el nombre debe de ser mayor a dos'
+                'mensaje' => 'La cantidad de digitos que debe de contener el nombre debe de ser mayor a dos'
             ]);
             return;
         }
 
-        $_POST['usuario_telefono'] = filter_var($_POST['usuario_telefono'], FILTER_VALIDATE_INT);
+        $_POST['fecha_prestamo'] = date('Y-m-d H:i', strtotime($_POST['fecha_prestamo']));
 
-        if (strlen($_POST['usuario_telefono']) != 8) {
+        try {
+
+            $data = Prestamos::find($id);
+            $data->sincronizar([
+                'libro_id' => $_POST['libro_id'],
+                'persona_nombre' => $_POST['persona_nombre'],
+                'fecha_prestamo' => $_POST['fecha_prestamo'],
+                'prestamo_situacion' => 1
+            ]);
+            $data->actualizar();
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'La informacion del prestamo ha sido modificada exitosamente'
+            ]);
+        } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mennsaje' => 'La cantidad de digitos de telefono debe de ser igual a 8'
+                'mensaje' => 'Error al guardar',
+                'detalle' => $e->getMessage(),
             ]);
-            return;
-        }
-
-        $_POST['usuario_nit'] = filter_var($_POST['usuario_nit'], FILTER_SANITIZE_NUMBER_INT);
-        $_POST['usuario_correo'] = filter_var($_POST['usuario_correo'], FILTER_SANITIZE_EMAIL);
-
-        if (!filter_var($_POST['usuario_correo'], FILTER_SANITIZE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mennsaje' => 'El correo electronico ingresado es invalido'
-            ]);
-            return;
-        }
-
-
-        $_POST['usuario_fecha'] = date ('Y-m-d H:i', strtotime($_POST['usuario_fecha'], FILTER_SANITIZE_NUMBER_INT));
-
-             if (!filter_var($_POST['usuario_fecha'], FILTER_SANITIZE_NUMBER_INT)) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mennsaje' => 'La fecha incorrecta'
-            ]);
-            return;
-        }
-
-
-        $_POST['usuario_estado'] = htmlspecialchars($_POST['usuario_estado']);
-
-        $estado = $_POST['usuario_estado'];
-
-        if ($estado == "P" || $estado == "F" || $estado == "C") {
-
-
-            try {
-
-
-                $data = Usuarios::find($id);
-                // $data->sincronizar($_POST);
-                $data->sincronizar([
-                    'usuario_nombres' => $_POST['usuario_nombres'],
-                    'usuario_apellidos' => $_POST['usuario_apellidos'],
-                    'usuario_nit' => $_POST['usuario_nit'],
-                    'usuario_telefono' => $_POST['usuario_telefono'],
-                    'usuario_correo' => $_POST['usuario_correo'],
-                    'usuario_estado' => $_POST['usuario_estado'],
-                    'usuario_fecha' => $_POST['usuario_fecha'],
-                    'usuario_situacion' => 1
-                ]);
-                $data->actualizar();
-
-                http_response_code(200);
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'La informacion del usuario ha sido modificada exitosamente'
-                ]);
-            } catch (Exception $e) {
-                http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al guardar',
-                    'detalle' => $e->getMessage(),
-                ]);
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mennsaje' => 'Los detinos solo puedes ser "P, F, C"'
-            ]);
-            return;
         }
     }
 
@@ -209,19 +180,7 @@ class UsuarioController extends ActiveRecord
 
             $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
 
-            // $data = Usuarios::find($id);
-            // // $data->sincronizar($_POST);
-            // $data->sincronizar([
-            //     'usuario_situacion' => 0,
-            // ]);
-            // $data->actualizar();
-
-            // $data = Usuarios::find($id);
-            // $data->eliminar();
-
-
-            $ejecutar = Usuarios::EliminarUsuarios($id);
-
+            $ejecutar = Prestamos::EliminarPrestamos($id);
 
             http_response_code(200);
             echo json_encode([
@@ -233,6 +192,35 @@ class UsuarioController extends ActiveRecord
             echo json_encode([
                 'codigo' => 0,
                 'mensaje' => 'Error al Eliminar',
+                'detalle' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public static function devolverAPI()
+    {
+
+        try {
+
+            $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
+
+            $data = Prestamos::find($id);
+            $data->sincronizar([
+                'fecha_devolucion' => date('Y-m-d H:i'),
+                'prestamo_situacion' => 0
+            ]);
+            $data->actualizar();
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'El libro ha sido devuelto correctamente'
+            ]);
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error al devolver',
                 'detalle' => $e->getMessage(),
             ]);
         }

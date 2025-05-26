@@ -2,43 +2,33 @@
 
 namespace Model;
 
-class Libros extends ActiveRecord
-{
-    protected static $tabla = 'libros';
-    // Para Informix SERIAL, NO incluir 'id' en las columnas
-    protected static $columnasDB = ['titulo_libro', 'nombre_autor'];
+class Libros extends ActiveRecord {
 
-    public $id;
-    public $titulo_libro;
-    public $nombre_autor;
+    public static $tabla = 'libros';
+    public static $columnasDB = [
+        'libro_titulo',
+        'libro_autor',
+        'libro_situacion'
+    ];
 
-    public function __construct($args = [])
-    {
-        $this->id = $args['id'] ?? null;
-        $this->titulo_libro = $args['titulo_libro'] ?? '';
-        $this->nombre_autor = $args['nombre_autor'] ?? '';
+    public static $idTabla = 'libro_id';
+    public $libro_id;
+    public $libro_titulo;
+    public $libro_autor;
+    public $libro_situacion;
+
+    public function __construct($args = []){
+        $this->libro_id = $args['libro_id'] ?? null;
+        $this->libro_titulo = $args['libro_titulo'] ?? '';
+        $this->libro_autor = $args['libro_autor'] ?? '';
+        $this->libro_situacion = $args['libro_situacion'] ?? 1;
     }
 
-    public function validar()
-    {
-        if (!$this->titulo_libro) {
-            self::$errores[] = "El título del libro es obligatorio";
-        }
-        if (!$this->nombre_autor) {
-            self::$errores[] = "El nombre del autor es obligatorio";
-        }
-        return self::$errores;
+    public static function EliminarLibros($id){
+
+        $sql = "DELETE FROM libros WHERE libro_id = $id";
+
+        return self::SQL($sql);
     }
 
-    // Método específico para Informix - no incluir campos SERIAL
-    public function sanitizarAtributos()
-    {
-        $atributos = [];
-        foreach (static::$columnasDB as $columna) {
-            if (isset($this->$columna)) {
-                $atributos[$columna] = $this->$columna;
-            }
-        }
-        return $atributos;
-    }
 }
