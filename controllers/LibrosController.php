@@ -4,10 +4,10 @@ namespace Controllers;
 
 use Exception;
 use Model\ActiveRecord;
-use Model\Libros;
 use MVC\Router;
+use PDO;
 
-class LibrosController extends ActiveRecord
+class LibrosController 
 {
     public function renderizarPagina(Router $router)
     {
@@ -16,76 +16,128 @@ class LibrosController extends ActiveRecord
     
     public static function guardarAPI()
     {
+        // Configurar headers primero
         header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
         
+        // Capturar todos los errores
         try {
-            // Limpiar datos
+            // Validar datos básicos
             $titulo = trim($_POST['titulo_libro'] ?? '');
             $autor = trim($_POST['nombre_autor'] ?? '');
-
-            // Validar
-            if (strlen($titulo) < 2) {
+            
+            if (empty($titulo) || empty($autor)) {
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'El título debe tener al menos 2 caracteres'
+                    'mensaje' => 'Datos requeridos faltantes'
                 ]);
-                return;
+                exit;
             }
-
-            if (strlen($autor) < 2) {
+            
+            if (strlen($titulo) < 2 || strlen($autor) < 2) {
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'El autor debe tener al menos 2 caracteres'
+                    'mensaje' => 'Los campos deben tener al menos 2 caracteres'
                 ]);
-                return;
+                exit;
             }
-
-            // Crear libro - SOLO con los campos que están en columnasDB
-            $libro = new Libros([
-                'titulo_libro' => $titulo,
-                'nombre_autor' => $autor
-            ]);
-
-            $resultado = $libro->crear();
-
+            
+            // Obtener conexión
+            $db = ActiveRecord::getDB();
+            
+            if (!$db) {
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'No se pudo conectar a la base de datos'
+                ]);
+                exit;
+            }
+            
+            // Intentar inserción directa con manejo de errores
+            $sql = "INSERT INTO libros (titulo_libro, nombre_autor) VALUES (?, ?)";
+            $stmt = $db->prepare($sql);
+            
+            if (!$stmt) {
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error preparando consulta'
+                ]);
+                exit;
+            }
+            
+            $resultado = $stmt->execute([$titulo, $autor]);
+            
             if ($resultado) {
                 echo json_encode([
                     'codigo' => 1,
-                    'mensaje' => 'Libro guardado correctamente'
+                    'mensaje' => 'Libro guardado exitosamente'
                 ]);
             } else {
+                $errorInfo = $stmt->errorInfo();
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'Error al guardar'
+                    'mensaje' => 'Error al guardar: ' . ($errorInfo[2] ?? 'Error desconocido')
                 ]);
             }
             
         } catch (Exception $e) {
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error: ' . $e->getMessage()
+                'mensaje' => 'Error del servidor: ' . $e->getMessage()
             ]);
         }
+        
+        exit; // Importante: terminar la ejecución
     }
     
     public static function buscarAPI()
     {
+        // Configurar headers primero
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        
         try {
-            header('Content-Type: application/json');
+            $db = ActiveRecord::getDB();
             
+            if (!$db) {
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'No se pudo conectar a la base de datos',
+                    'data' => []
+                ]);
+                exit;
+            }
+            
+            // Query simple
             $sql = "SELECT id, titulo_libro, nombre_autor FROM libros ORDER BY titulo_libro";
-            $data = self::fetchArray($sql);
-
+            $stmt = $db->prepare($sql);
+            
+            if (!$stmt) {
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error preparando consulta de búsqueda',
+                    'data' => []
+                ]);
+                exit;
+            }
+            
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
             echo json_encode([
                 'codigo' => 1,
                 'mensaje' => 'Libros obtenidos correctamente',
-                'data' => $data
+                'data' => $data ?? []
             ]);
+            
         } catch (Exception $e) {
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error al obtener libros: ' . $e->getMessage()
+                'mensaje' => 'Error al buscar libros: ' . $e->getMessage(),
+                'data' => []
             ]);
         }
+        
+        exit; // Importante: terminar la ejecución
     }
 }

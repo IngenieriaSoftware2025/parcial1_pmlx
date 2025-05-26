@@ -5,7 +5,8 @@ namespace Model;
 class Libros extends ActiveRecord
 {
     protected static $tabla = 'libros';
-    protected static $columnasDB = ['titulo_libro', 'nombre_autor']; // SIN ID
+    // Para Informix SERIAL, NO incluir 'id' en las columnas
+    protected static $columnasDB = ['titulo_libro', 'nombre_autor'];
 
     public $id;
     public $titulo_libro;
@@ -27,5 +28,17 @@ class Libros extends ActiveRecord
             self::$errores[] = "El nombre del autor es obligatorio";
         }
         return self::$errores;
+    }
+
+    // Método específico para Informix - no incluir campos SERIAL
+    public function sanitizarAtributos()
+    {
+        $atributos = [];
+        foreach (static::$columnasDB as $columna) {
+            if (isset($this->$columna)) {
+                $atributos[$columna] = $this->$columna;
+            }
+        }
+        return $atributos;
     }
 }

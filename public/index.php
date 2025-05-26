@@ -1,29 +1,29 @@
 <?php 
 require_once __DIR__ . '/../includes/app.php';
 
-use Controllers\UsuarioController;
+
+use Controllers\LibroController;
+use Controllers\PrestamoController;
 use MVC\Router;
 use Controllers\AppController;
-use Controllers\LibrosController;
-
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
 
+
 $router->get('/', [AppController::class,'index']);
 
-//RUTAS PARA LIBROS
-$router->get('/libros', [LibrosController::class, 'renderizarPagina']);
-$router->post('/libros/guardarAPI', [LibrosController::class, 'guardarAPI']);
-$router->get('/libros/buscarAPI', [LibrosController::class, 'buscarAPI']);
-$router->post('/libros/modificarAPI', [LibrosController::class, 'modificarAPI']);
-$router->get('/libros/eliminar', [LibrosController::class, 'EliminarAPI']);
 
-//RUTAS PARA USUARIOS
-$router->get('/usuarios', [UsuarioController::class, 'renderizarPagina']);
-$router->post('/usuarios/guardarAPI', [UsuarioController::class, 'guardarAPI']);
-$router->get('/usuarios/buscarAPI', [UsuarioController::class, 'buscarAPI']);
-$router->post('/usuarios/modificarAPI', [UsuarioController::class, 'modificarAPI']);
-$router->get('/usuarios/eliminar', [UsuarioController::class, 'EliminarAPI']);
+$router->get('/libros', [PrestamoController::class, 'renderizarPagina']);
+$router->post('/libros/guardarAPI', [LibroController::class, 'guardarAPI']);
+$router->get('/libros/buscarAPI', [LibroController::class, 'buscarAPI']);
+$router->post('/libros/modificarAPI', [LibroController::class, 'modificarAPI']);
+$router->get('/libros/eliminar', [LibroController::class, 'EliminarAPI']);
 
-// Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
+$router->post('/prestamos/guardarAPI', [PrestamoController::class, 'guardarAPI']);
+$router->get('/prestamos/buscarAPI', [PrestamoController::class, 'buscarAPI']);
+$router->post('/prestamos/modificarAPI', [PrestamoController::class, 'modificarAPI']);
+$router->get('/prestamos/eliminar', [PrestamoController::class, 'EliminarAPI']);
+$router->get('/prestamos/devolver', [PrestamoController::class, 'devolverAPI']);
+
+
 $router->comprobarRutas();
